@@ -9,7 +9,8 @@
 - [x] v2.0.0: release roadmap in the update manifest, per-platform update links (Apple Silicon / Intel / Windows).
 - [x] v2.0.0: smooth sliders (no jumps while dragging), real brightness + volume on Mac and Windows, live music sync (title, position, seek).
 - [x] v2.0.0: assistant chat accepts typing in the desktop overlay.
-- [ ] v2.0.0: package Mac arm64, Mac Intel, Windows x64 and publish the site.
+- [x] v2.0.0: packaged Mac arm64, Mac Intel, Windows x64; downloads + update manifest point at the new builds.
+- [ ] Publish the site.
 - [ ] Code signing / notarization: needs Developer ID (Mac) and code-signing cert (Windows).
 
 ## Planned releases (shown in the app's update screen)
