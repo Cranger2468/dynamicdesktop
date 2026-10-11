@@ -1,8 +1,8 @@
 {
   "version": "2.0.0",
-  "macArm": "/__l5e/assets-v1/08c0bfb6-6b91-42aa-a681-81886b6523ad/Island-mac-arm64.zip",
-  "macIntel": "/__l5e/assets-v1/be5ac1d9-bc90-4973-ba8c-ea4f1d0818ae/Island-mac-intel.zip",
-  "windows": "/__l5e/assets-v1/7cd97e56-d9cd-461f-960a-f439531a4b76/Island-windows-x64.zip",
+  "macArm": "/__l5e/assets-v1/fc7b82a4-5576-4a35-b252-84c2ea1af8d7/Island-mac-arm64.zip",
+  "macIntel": "/__l5e/assets-v1/59b3c52c-b9ce-4de6-8009-c5fcce9c040a/Island-mac-intel.zip",
+  "windows": "/__l5e/assets-v1/e3ec0b1d-508e-4a2a-9bc3-515f9d21e87b/Island-windows-x64.zip",
   "notes": [
     "Sliders stay put while you drag — volume, brightness and track progress no longer snap back.",
     "Real brightness and volume control on Mac and Windows.",
