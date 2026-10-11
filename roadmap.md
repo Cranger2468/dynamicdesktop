@@ -6,9 +6,9 @@
 - [x] Live dashboard, Intel Mac + Windows builds, website downloads.
 - [x] Intel build on Electron 38 + LSMinimumSystemVersion 12.0 (macOS 12 Monterey support).
 - [x] Functional simulation events, lower idle RAM (lazy dashboard window, slower/idle-aware polling).
-- [ ] v2.0.0: release roadmap in the update manifest, per-platform update links (Apple Silicon / Intel / Windows).
-- [ ] v2.0.0: smooth sliders (no jumps while dragging), real brightness + volume on Mac and Windows, live music sync (title, position, seek).
-- [ ] v2.0.0: assistant chat accepts typing in the desktop overlay.
+- [x] v2.0.0: release roadmap in the update manifest, per-platform update links (Apple Silicon / Intel / Windows).
+- [x] v2.0.0: smooth sliders (no jumps while dragging), real brightness + volume on Mac and Windows, live music sync (title, position, seek).
+- [x] v2.0.0: assistant chat accepts typing in the desktop overlay.
 - [ ] v2.0.0: package Mac arm64, Mac Intel, Windows x64 and publish the site.
 - [ ] Code signing / notarization: needs Developer ID (Mac) and code-signing cert (Windows).
 
