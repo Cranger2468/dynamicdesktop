@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BatteryCharging, Battery, Cpu, MemoryStick, Clock, Pause, Play, SkipBack, SkipForward, Volume2, Laptop } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { DesktopState, SystemStats } from '@/lib/island-model';
@@ -9,10 +9,10 @@ const hours = (s: number) => `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) /
 export function DesktopDashboard({ onNotice }: { onNotice: (m: string) => void }) {
  const [stats, setStats] = useState<SystemStats | null>(null);
  const [sys, setSys] = useState<DesktopState>({});
- const [volume, setVolume] = useState<number | null>(null);
+ const [volume, setVolume] = useState<number | null>(null); const dragging = useRef<string | null>(null);
  useEffect(() => {
   const bridge = window.islandDesktop; if (!bridge) return;
-  return bridge.onSystem(s => { if (s.stats) setStats(s.stats); const { stats: _s, ...rest } = s; setSys(prev => ({ ...prev, ...rest })); if (typeof s.volume === 'number') setVolume(s.volume); });
+  return bridge.onSystem(s => { if (s.stats) setStats(s.stats); const { stats: _s, ...rest } = s; setSys(prev => ({ ...prev, ...rest })); if (typeof s.volume === 'number' && dragging.current !== 'Volume') setVolume(s.volume); });
  }, []);
  async function act(name: string, value?: number) {
   const r = await window.islandDesktop?.action(name, value);
@@ -31,7 +31,7 @@ export function DesktopDashboard({ onNotice }: { onNotice: (m: string) => void }
      <Button variant="outline" size="icon" aria-label="Next track" onClick={() => act('next')}><SkipForward /></Button>
     </div>
     <div className="tuning-label"><label htmlFor="dash-volume">Volume</label><span>{volume ?? '—'}%</span></div>
-    <input id="dash-volume" type="range" min="0" max="100" value={volume ?? 50} onChange={e => setVolume(Number(e.target.value))} onMouseUp={e => act('volume', Number((e.target as HTMLInputElement).value))} onKeyUp={e => act('volume', Number((e.target as HTMLInputElement).value))} />
+    <input id="dash-volume" className="island-range" type="range" min="0" max="100" value={volume ?? 50} aria-label="Volume" onPointerDown={() => { dragging.current = 'Volume'; }} onKeyDown={() => { dragging.current = 'Volume'; }} onChange={e => setVolume(Number(e.target.value))} onPointerUp={e => { if (dragging.current !== 'Volume') return; dragging.current = null; act('volume', Number((e.target as HTMLInputElement).value)); }} onPointerCancel={e => { dragging.current = null; }} onKeyUp={e => { if (dragging.current !== 'Volume') return; dragging.current = null; act('volume', Number((e.target as HTMLInputElement).value)); }} onBlur={() => { dragging.current = null; }} />
    </div>
    <Stat icon={<Cpu size={15} />} label="CPU" value={stats ? `${stats.cpu}%` : '—'} detail={stats ? `${stats.cores} cores · ${stats.cpuModel}` : ''} pct={stats?.cpu} />
    <Stat icon={<MemoryStick size={15} />} label="Memory" value={stats ? `${memPct}%` : '—'} detail={stats ? `${gb(stats.memUsed)} of ${gb(stats.memTotal)}` : ''} pct={memPct} />
