@@ -41,7 +41,7 @@ function secureWindow(w) {
 function load(w) {if(devUrl) return w.loadURL(devUrl); return w.loadFile(path.join(__dirname,'..','dist','index.html'));}
 function showControl() {if(!control || control.isDestroyed()) makeControl(); else {control.show();control.focus();void readSystem();readStats();}}
 function makeControl() {
- control=new BrowserWindow({width:1220,height:970,minWidth:780,minHeight:620,title:'Island',backgroundColor:'#fafbfc',show:false,autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+ control=new BrowserWindow({width:1220,height:970,minWidth:780,minHeight:620,title:'Island',icon:path.join(__dirname,'icon.png'),backgroundColor:'#fafbfc',show:false,autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
  secureWindow(control); load(control); control.once('ready-to-show',()=>control.show());
  control.webContents.on('did-finish-load',()=>{control.webContents.send('island:state',{...shared,settings}); void readSystem(); readStats();});
  control.on('close',e=>{if(!quitting){e.preventDefault();control.hide();}});
@@ -66,12 +66,12 @@ function readStats() {
  if(!controlAwake()) return; // skip the payload work while the dashboard is hidden
  broadcast('island:system',{stats:{cpu:total>0?Math.round(100*(1-idle/total)):0,memUsed:os.totalmem()-os.freemem(),memTotal:os.totalmem(),uptime:os.uptime(),host:os.hostname(),os:`${mac?'macOS':win?'Windows':os.type()} ${os.release()}`,cpuModel:now[0]?.model?.trim()||'CPU',cores:now.length,arch:process.arch}});
 }
-const macScript = appName => `tell application "${appName}"\nif player state is not stopped then\nreturn (name of current track) & "||" & (artist of current track) & "||" & (player state as string) & "||" & (player position as string) & "||" & ((duration of current track) as string)\nend if\nend tell`;
+const macScript = appName => `tell application "${appName}"\nif player state is not stopped then\nreturn (name of current track) & "||" & (artist of current track) & "||" & (player state as string) & "||" & (player position as string) & "||" & ((duration of current track) as string) & "||" & ${appName==='Spotify'?'(artwork url of current track)':'""'}\nend if\nend tell`;
 const num = v => {const n=Number(String(v||'').replace(',','.')); return Number.isFinite(n)?n:0;};
 async function macPlayer() {
  // Query only already-running players; never launch them.
  for(const appName of ['Spotify','Music']) {
-  try {await run('/usr/bin/pgrep',['-x',appName]); const info=await run('/usr/bin/osascript',['-e',macScript(appName)]); if(info){const [title,artist,state,pos,dur]=info.split('||'); const length=appName==='Spotify'?num(dur)/1000:num(dur); return {app:appName,title,artist,playing:state==='playing',position:Math.round(num(pos)),length:Math.round(length)};}} catch {}
+  try {await run('/usr/bin/pgrep',['-x',appName]); const info=await run('/usr/bin/osascript',['-e',macScript(appName)]); if(info){const [title,artist,state,pos,dur,art]=info.split('||'); const length=appName==='Spotify'?num(dur)/1000:num(dur); return {app:appName,title,artist,playing:state==='playing',position:Math.round(num(pos)),length:Math.round(length),artwork:/^https:\/\//.test(art||'')?art.trim():''};}} catch {}
  }
  return null;
 }
@@ -80,7 +80,8 @@ async function winPlayer() {
  if(!data) return null; const [title,artist,state,pos,dur,source]=data.split('||'); if(!title) return null;
  return {app:(source||'Windows').split('!')[0].replace(/\.exe$/i,''),title,artist,playing:state==='Playing',position:num(pos),length:num(dur)};
 }
-function sendPlayer() {if(!player) return; broadcast('island:system',{title:player.title,artist:player.artist,playing:player.playing,source:player.app,position:Date.now()-lastSeek<3000?undefined:player.position,length:player.length}); if(player.playing&&!wasPlaying) broadcast('island:state',{active:'Media',expanded:true}); wasPlaying=player.playing;}
+let hadPlayer=false;
+function sendPlayer() {if(!player){if(hadPlayer){hadPlayer=false;wasPlaying=false;broadcast('island:system',{cleared:true});} return;} hadPlayer=true; broadcast('island:system',{title:player.title,artist:player.artist,artwork:player.artwork||'',playing:player.playing,source:player.app,position:Date.now()-lastSeek<3000?undefined:player.position,length:player.length}); if(player.playing&&!wasPlaying) broadcast('island:state',{active:'Media',expanded:true}); wasPlaying=player.playing;}
 async function readSystem() {
  if(!controlAwake() && !(island && !island.isDestroyed() && island.isVisible())) return; // nothing is showing; stay idle
  if(mac) {
@@ -184,7 +185,7 @@ else {
    });
   screen.on('display-added',position);screen.on('display-removed',position);screen.on('display-metrics-changed',position);
   powerMonitor.on('on-ac',()=>void readSystem());powerMonitor.on('on-battery',()=>void readSystem());
-  void readSystem();const tick=()=>{poll=setTimeout(async()=>{await readSystem().catch(()=>{});tick();},player?.playing?4000:10000);};tick();statsPoll=setInterval(readStats,5000);
+  void readSystem();const tick=()=>{poll=setTimeout(async()=>{await readSystem().catch(()=>{});tick();},player?.playing?1500:player?3000:8000);};tick();statsPoll=setInterval(readStats,5000);
  });
 }
 app.on('window-all-closed',()=>{});
