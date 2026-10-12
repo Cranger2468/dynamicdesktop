@@ -41,7 +41,7 @@ function secureWindow(w) {
 function load(w) {if(devUrl) return w.loadURL(devUrl); return w.loadFile(path.join(__dirname,'..','dist','index.html'));}
 function showControl() {if(!control || control.isDestroyed()) makeControl(); else {control.show();control.focus();void readSystem();readStats();}}
 function makeControl() {
- control=new BrowserWindow({width:1220,height:970,minWidth:780,minHeight:620,title:'Island',backgroundColor:'#fafbfc',show:false,autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+ control=new BrowserWindow({width:1220,height:970,minWidth:780,minHeight:620,title:'Island',icon:path.join(__dirname,'icon.png'),backgroundColor:'#fafbfc',show:false,autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
  secureWindow(control); load(control); control.once('ready-to-show',()=>control.show());
  control.webContents.on('did-finish-load',()=>{control.webContents.send('island:state',{...shared,settings}); void readSystem(); readStats();});
  control.on('close',e=>{if(!quitting){e.preventDefault();control.hide();}});
