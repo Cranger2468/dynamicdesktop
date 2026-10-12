@@ -22,7 +22,7 @@ export function IslandExperience() {
  const [volume, setVolume] = useState(65); const [brightness, setBrightness] = useState(75); const [seconds, setSeconds] = useState(300); const [timerRunning, setTimerRunning] = useState(false);
  const [battery, setBattery] = useState(84); const [charging, setCharging] = useState(true); const [download, setDownload] = useState(38);
  const [view, setView] = useState<'general'|'events'|'appearance'>('general'); const [help, setHelp] = useState(false); const [notice, setNotice] = useState(''); const [ready, setReady] = useState(false); const [overlay, setOverlay] = useState(false); const [displays, setDisplays] = useState([{id:'primary',name:'Built-in display'}]);
- const [systemSong, setSystemSong] = useState<{title:string;artist:string;length:number} | null>(null); const dragging = useRef<string | null>(null); const remote = useRef(false); const assistantInput = useRef<HTMLInputElement>(null); const [roadmap, setRoadmap] = useState<{version:string;title:string;eta:string}[]>([]);
+ const [systemSong, setSystemSong] = useState<{title:string;artist:string;length:number;artwork?:string} | null>(null); const dragging = useRef<string | null>(null); const remote = useRef(false); const assistantInput = useRef<HTMLInputElement>(null); const [roadmap, setRoadmap] = useState<{version:string;title:string;eta:string}[]>([]);
  const [flags, setFlags] = useState({Focus: false, Network: true, Bluetooth: true, Camera: false, Microphone: false});
  const notes = ['Take a breath. Your next meeting starts in 5 minutes.', 'Island 2.1 is coming soon — see Software update.', 'Alex shared “Coastal-wallpaper.jpg” with you.'];
  const [noteIdx, setNoteIdx] = useState(0); const [now, setNow] = useState(() => new Date());
