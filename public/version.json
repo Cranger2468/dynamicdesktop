@@ -1,18 +1,29 @@
 {
-  "version": "2.0.0",
-  "macArm": "/__l5e/assets-v1/39af0463-2d61-4828-bbc2-4bffcd76d5b1/Island-mac-arm64.zip",
-  "macIntel": "/__l5e/assets-v1/2aa2d0f7-d9e4-498a-b48d-760ed466aa07/Island-mac-intel.zip",
-  "windows": "/__l5e/assets-v1/e5aca7f1-007c-4177-a607-5db732e93fa3/Island-windows-x64.zip",
+  "version": "2.0.1",
+  "macArm": "/__l5e/assets-v1/c27047ab-31bd-4cbb-b003-e27709d51942/Island-mac-arm64.zip",
+  "macIntel": "/__l5e/assets-v1/5aa65ab4-7022-48be-b9f5-94de5c0c145e/Island-mac-intel.zip",
+  "windows": "/__l5e/assets-v1/d36dc87a-2c29-45a9-82a2-32eb4b4ddc74/Island-windows-x64.zip",
   "notes": [
-    "Sliders stay put while you drag — volume, brightness and track progress no longer snap back.",
-    "Real brightness and volume control on Mac and Windows.",
-    "Live music sync: title, position and seeking in the island.",
-    "Type to the Island assistant right in the desktop overlay.",
-    "Lower idle memory use."
+    "Music sync really works: song, artist, playback and position follow Spotify and Music in real time.",
+    "Spotify album artwork now shows in the island.",
+    "New Island logo for the app and the menu-bar emblem.",
+    "Clicking the menu-bar emblem now just opens its menu — choose “Open dashboard” to open the dashboard."
   ],
   "roadmap": [
-    {"version": "2.1", "title": "Album artwork from the player, per-app volume on Windows", "eta": ""},
-    {"version": "2.2", "title": "Calendar “next meeting” event, clipboard shelf", "eta": ""},
-    {"version": "3.0", "title": "Signed + notarized builds with automatic in-place updates", "eta": ""}
+    {
+      "version": "2.1",
+      "title": "Per-app volume on Windows, Apple Music artwork",
+      "eta": ""
+    },
+    {
+      "version": "2.2",
+      "title": "Calendar “next meeting” event, clipboard shelf",
+      "eta": ""
+    },
+    {
+      "version": "3.0",
+      "title": "Signed + notarized builds with automatic in-place updates",
+      "eta": ""
+    }
   ]
 }
