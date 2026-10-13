@@ -20,14 +20,16 @@ export const Route = createFileRoute('/api/public/assistant')({
     handlers: {
       OPTIONS: () => new Response(null, { headers: cors }),
       POST: async ({ request }) => {
-        let body: { question?: string; status?: unknown };
+        let body: { question?: string; status?: unknown; mode?: string; text?: string };
         try {
           body = await request.json();
         } catch {
           return Response.json({ error: 'Invalid request body.' }, { status: 400, headers: cors });
         }
+        const fix = body.mode === 'fix';
         const question = String(body.question ?? '').slice(0, 500);
-        if (!question) return Response.json({ error: 'Ask something first.' }, { status: 400, headers: cors });
+        const fixText = String(body.text ?? '').slice(0, 4000);
+        if (!question || (fix && !fixText)) return Response.json({ error: 'Ask something first.' }, { status: 400, headers: cors });
 
         const apiKey = process.env['LOVABLE_API_KEY'];
         if (!apiKey) return Response.json({ error: 'Assistant is not configured.' }, { status: 500, headers: cors });
@@ -41,8 +43,8 @@ export const Route = createFileRoute('/api/public/assistant')({
           },
           body: JSON.stringify({
             model: 'openai/gpt-6-astra',
-            instructions: SYSTEM,
-            input: `Status: ${JSON.stringify(body.status ?? {})}\nQuestion: ${question}`,
+            instructions: fix ? 'You transform text. Apply the requested instruction to the text and put ONLY the resulting text in "reply" (no preamble). Set action to "none" and value to null.' : SYSTEM,
+            input: fix ? `Instruction: ${question}\n\nText:\n${fixText}` : `Status: ${JSON.stringify(body.status ?? {})}\nQuestion: ${question}`,
             reasoning: { effort: 'low' },
             store: false,
             stream: true,

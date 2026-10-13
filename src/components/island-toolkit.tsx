@@ -38,10 +38,8 @@ export function IslandToolkit({ onNotice }: { onNotice: (s: string) => void }) {
     if (!text) { onNotice('Copy or paste some text first.'); return; }
     setBusy(true); setFixOut('');
     try {
-      const res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `${kind}. Reply with only the resulting text, no commentary, action none:\n\n${text}` }) });
-      const raw = await res.text();
-      let reply = '';
-      try { reply = JSON.parse(raw).reply; } catch { const m = raw.match(/"reply"\s*:\s*"((?:[^"\\]|\\.)*)"/); reply = m ? JSON.parse(`"${m[1]}"`) : ''; }
+      const res = await fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'fix', question: kind, text }) });
+      const reply = String((await res.json()).reply ?? '');
       if (!reply) throw new Error('empty');
       setFixOut(reply);
     } catch { setFixOut('The AI could not be reached. Check your internet connection.'); }
