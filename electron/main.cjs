@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const {execFile} = require('node:child_process');
 let control, island, tray, quitting=false, settings={enabled:true,login:false,offset:8,display:'primary',events:{}}, shared={active:'Media',expanded:false,playing:false}, poll, statsPoll, hitTest, player=null, lastCpu=os.cpus(), winVolume=50, wasPlaying=false, lastSeek=0, wasCharging=null, dockVisible=false;
-const UPDATE_URL='https://islandbeta.lovable.app/version.json';
+const UPDATE_URL='https://dynamicdesktop.lovable.app/version.json';
 const devUrl=process.env.ISLAND_DEV_URL;
 const mac=process.platform==='darwin', win=process.platform==='win32';
 const run = (command,args) => new Promise((resolve,reject) => execFile(command,args,{timeout:8000,maxBuffer:65536,windowsHide:true},(error,stdout) => error ? reject(error) : resolve(String(stdout).trim())));
