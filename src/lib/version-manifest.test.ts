@@ -5,8 +5,8 @@ import { resolve } from 'node:path';
 const manifest = JSON.parse(readFileSync(resolve(__dirname, '../../public/version.json'), 'utf8'));
 
 describe('update manifest', () => {
-  it('reports version 2.0.1', () => {
-    expect(manifest.version).toBe('2.0.1');
+  it('reports version 2.1.0', () => {
+    expect(manifest.version).toBe('2.1.0');
   });
 
   it('keeps a download link for every platform', () => {
