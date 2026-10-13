@@ -1,29 +1,20 @@
 {
-  "version": "2.0.1",
-  "macArm": "/__l5e/assets-v1/c27047ab-31bd-4cbb-b003-e27709d51942/Island-mac-arm64.zip",
-  "macIntel": "/__l5e/assets-v1/5aa65ab4-7022-48be-b9f5-94de5c0c145e/Island-mac-intel.zip",
-  "windows": "/__l5e/assets-v1/d36dc87a-2c29-45a9-82a2-32eb4b4ddc74/Island-windows-x64.zip",
+  "version": "2.1.0",
+  "macArm": "/__l5e/assets-v1/be7bc4e4-93e7-47ca-b41f-4cab14c5f923/Island-mac-arm64.zip",
+  "macIntel": "/__l5e/assets-v1/e9244227-7e82-4ca3-95cc-a300dd66ae18/Island-mac-intel.zip",
+  "windows": "/__l5e/assets-v1/bfd78ae3-09ac-45f9-abf9-9cd0f1e529e3/Island-windows-x64.zip",
   "notes": [
-    "Music sync really works: song, artist, playback and position follow Spotify and Music in real time.",
-    "Spotify album artwork now shows in the island.",
-    "New Island logo for the app and the menu-bar emblem.",
-    "Clicking the menu-bar emblem now just opens its menu — choose “Open dashboard” to open the dashboard."
+    "Software update now checks the right place, so new versions show up.",
+    "Clipboard history: your last 5 copied items, one click to copy again (colors show a swatch).",
+    "Scratchpad and quick todos, saved on your computer.",
+    "Converter: currencies (approximate), units, temperatures and time zones.",
+    "AI fix: rewrite, summarize, translate or fix grammar for any text.",
+    "Ambient sounds: rain, coffee shop, white noise, ocean waves.",
+    "Stealth mode and battery time remaining on Mac."
   ],
   "roadmap": [
-    {
-      "version": "2.1",
-      "title": "Per-app volume on Windows, Apple Music artwork",
-      "eta": ""
-    },
-    {
-      "version": "2.2",
-      "title": "Calendar “next meeting” event, clipboard shelf",
-      "eta": ""
-    },
-    {
-      "version": "3.0",
-      "title": "Signed + notarized builds with automatic in-place updates",
-      "eta": ""
-    }
+    {"version": "2.2", "title": "Calendar meeting countdown, system graphs, memory warnings", "eta": ""},
+    {"version": "2.3", "title": "Per-app volume, lyrics, colour picker, album-colour glow", "eta": ""},
+    {"version": "3.0", "title": "Signed builds with automatic in-place updates", "eta": ""}
   ]
 }

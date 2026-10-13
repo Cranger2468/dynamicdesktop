@@ -1,9 +1,10 @@
-const {app, BrowserWindow, Tray, Menu, screen, nativeImage, ipcMain, powerMonitor, shell} = require('electron');
+const {app, BrowserWindow, Tray, Menu, screen, nativeImage, ipcMain, powerMonitor, shell, clipboard} = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const {execFile} = require('node:child_process');
 let control, island, tray, quitting=false, settings={enabled:true,login:false,offset:8,display:'primary',events:{}}, shared={active:'Media',expanded:false,playing:false}, poll, statsPoll, hitTest, player=null, lastCpu=os.cpus(), winVolume=50, wasPlaying=false, lastSeek=0, wasCharging=null, dockVisible=false;
+let clips=[], lastClip='';
 const UPDATE_URL='https://dynamicdesktop.lovable.app/version.json';
 const devUrl=process.env.ISLAND_DEV_URL;
 const mac=process.platform==='darwin', win=process.platform==='win32';
@@ -85,7 +86,7 @@ function sendPlayer() {if(!player){if(hadPlayer){hadPlayer=false;wasPlaying=fals
 async function readSystem() {
  if(!controlAwake() && !(island && !island.isDestroyed() && island.isVisible())) return; // nothing is showing; stay idle
  if(mac) {
-   try {const data=await run('/usr/bin/pmset',['-g','batt']);const pct=data.match(/(\d+)%;/);const charging=data.includes('AC Power');if(pct) broadcast('island:system',{battery:Number(pct[1]),charging});if(wasCharging!==null&&charging!==wasCharging) broadcast('island:state',{active:'Battery',expanded:true});wasCharging=charging;} catch(error){console.warn('Battery unavailable:',error.message);}
+   try {const data=await run('/usr/bin/pmset',['-g','batt']);const pct=data.match(/(\d+)%;/);const charging=data.includes('AC Power');const left=data.match(/(\d+:\d+) remaining/);if(pct) broadcast('island:system',{battery:Number(pct[1]),charging,batteryTime:left?`${left[1]} ${charging?'until full':'left'}`:''});if(wasCharging!==null&&charging!==wasCharging) broadcast('island:state',{active:'Battery',expanded:true});wasCharging=charging;} catch(error){console.warn('Battery unavailable:',error.message);}
    try {const volume=await run('/usr/bin/osascript',['-e','output volume of (get volume settings)']);broadcast('island:system',{volume:Number(volume)});}catch{}
    player=await macPlayer(); sendPlayer();
   } else if(win) {
@@ -183,6 +184,9 @@ else {
      return {ok:true,path:file};
     } catch(error){return {ok:false,error:'The download failed. Check your connection and try again.'};}
    });
+  ipcMain.handle('island:clipboard',event=>{if(!trusted(event)) throw new Error('Untrusted caller'); return clips;});
+  ipcMain.handle('island:copy',(event,text)=>{if(!trusted(event)) throw new Error('Untrusted caller'); const t=String(text||'').slice(0,20000); lastClip=t; clipboard.writeText(t); clips=[t,...clips.filter(c=>c!==t)].slice(0,5); broadcast('island:clipboard',clips);});
+  setInterval(()=>{const t=clipboard.readText(); if(!t||t===lastClip||t.length>20000) return; lastClip=t; clips=[t,...clips.filter(c=>c!==t)].slice(0,5); broadcast('island:clipboard',clips);},1500);
   screen.on('display-added',position);screen.on('display-removed',position);screen.on('display-metrics-changed',position);
   powerMonitor.on('on-ac',()=>void readSystem());powerMonitor.on('on-battery',()=>void readSystem());
   void readSystem();const tick=()=>{poll=setTimeout(async()=>{await readSystem().catch(()=>{});tick();},player?.playing?1500:player?3000:8000);};tick();statsPoll=setInterval(readStats,5000);
