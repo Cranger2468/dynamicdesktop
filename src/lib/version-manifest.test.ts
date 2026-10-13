@@ -19,6 +19,6 @@ describe('update manifest', () => {
   it('lists release notes and the planned roadmap', () => {
     expect(Array.isArray(manifest.notes)).toBe(true);
     expect(manifest.notes.length).toBeGreaterThan(0);
-    expect(manifest.roadmap.map((r: { version: string }) => r.version)).toEqual(['2.1', '2.2', '3.0']);
+    expect(manifest.roadmap.map((r: { version: string }) => r.version)).toEqual(['2.2', '2.3', '3.0']);
   });
 });
