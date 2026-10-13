@@ -55,7 +55,7 @@ export function IslandExperience() {
  }
  async function ask(text: string) {
   const q = text.trim(); if(!q) return; setDraft(''); setChat(c => [...c.slice(-6), {from:'you',text:q}]);
-  const endpoint = window.islandDesktop ? 'https://islandbeta.lovable.app/api/public/assistant' : '/api/public/assistant';
+  const endpoint = window.islandDesktop ? 'https://dynamicdesktop.lovable.app/api/public/assistant' : '/api/public/assistant';
   try {
    const res = await fetch(endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({question: q, status: {battery, charging, volume, brightness, playing, track: systemSong?.title ?? song.title, timerSeconds: seconds, timerRunning}})});
    if(!res.ok) throw new Error(String(res.status));
