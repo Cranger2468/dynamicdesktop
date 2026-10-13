@@ -184,6 +184,9 @@ else {
      return {ok:true,path:file};
     } catch(error){return {ok:false,error:'The download failed. Check your connection and try again.'};}
    });
+  ipcMain.handle('island:clipboard',event=>{if(!trusted(event)) throw new Error('Untrusted caller'); return clips;});
+  ipcMain.handle('island:copy',(event,text)=>{if(!trusted(event)) throw new Error('Untrusted caller'); const t=String(text||'').slice(0,20000); lastClip=t; clipboard.writeText(t); clips=[t,...clips.filter(c=>c!==t)].slice(0,5); broadcast('island:clipboard',clips);});
+  setInterval(()=>{const t=clipboard.readText(); if(!t||t===lastClip||t.length>20000) return; lastClip=t; clips=[t,...clips.filter(c=>c!==t)].slice(0,5); broadcast('island:clipboard',clips);},1500);
   screen.on('display-added',position);screen.on('display-removed',position);screen.on('display-metrics-changed',position);
   powerMonitor.on('on-ac',()=>void readSystem());powerMonitor.on('on-battery',()=>void readSystem());
   void readSystem();const tick=()=>{poll=setTimeout(async()=>{await readSystem().catch(()=>{});tick();},player?.playing?1500:player?3000:8000);};tick();statsPoll=setInterval(readStats,5000);

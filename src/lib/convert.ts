@@ -13,19 +13,21 @@ function offset(zone: string, at: Date) {
 export function convert(input: string, now = new Date()): string | null {
   const q = input.trim().toLowerCase();
   const t = q.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s+(.+?)\s+(?:in|to)\s+(.+)$/);
-  if (t && zones[t[4]] && zones[t[5]]) {
+  if (t && t[1] && t[4] && t[5] && zones[t[4]] && zones[t[5]]) {
+    const z4 = zones[t[4]] as string, z5 = zones[t[5]] as string, tz5 = t[5];
     let h = Number(t[1]) % 12 + (t[3] === 'pm' ? 12 : 0); if (!t[3]) h = Number(t[1]);
-    const from = offset(zones[t[4]], now), to = offset(zones[t[5]], now);
+    const from = offset(z4, now), to = offset(z5, now);
     const mins = ((h * 60 + Number(t[2] || 0) - from + to) % 1440 + 1440) % 1440;
     const hh = Math.floor(mins / 60), mm = mins % 60;
-    return `${((hh + 11) % 12) + 1}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'} in ${t[5].replace(/\b\w/g, c => c.toUpperCase())}`;
+    return `${((hh + 11) % 12) + 1}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'} in ${tz5.replace(/\b\w/g, c => c.toUpperCase())}`;
   }
   const m = q.match(/^(-?[\d.,]+)\s*([a-z°]+)\s+(?:in|to)\s+([a-z°]+)$/);
-  if (!m) return null;
+  if (!m || !m[1] || !m[2] || !m[3]) return null;
   const n = Number(m[1].replace(/,/g, '')), a = m[2].replace('°', ''), b = m[3].replace('°', '');
   if (!Number.isFinite(n)) return null;
   const A = a.toUpperCase(), B = b.toUpperCase();
-  if (usd[A] && usd[B]) return `≈ ${round(n / usd[A] * usd[B])} ${B} (approximate rate)`;
+  const ra = usd[A], rb = usd[B];
+  if (ra && rb) return `≈ ${round(n / ra * rb)} ${B} (approximate rate)`;
   if ((a === 'c' || a === 'f') && (b === 'c' || b === 'f')) return `${round(a === b ? n : a === 'c' ? n * 9 / 5 + 32 : (n - 32) * 5 / 9)} °${B}`;
   const ua = units[a], ub = units[b];
   if (ua && ub && ua[0] === ub[0]) return `${round(n * ua[1] / ub[1])} ${b}`;
