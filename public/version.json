@@ -1,20 +1,31 @@
 {
-  "version": "2.1.0",
-  "macArm": "/__l5e/assets-v1/be7bc4e4-93e7-47ca-b41f-4cab14c5f923/Island-mac-arm64.zip",
-  "macIntel": "/__l5e/assets-v1/e9244227-7e82-4ca3-95cc-a300dd66ae18/Island-mac-intel.zip",
-  "windows": "/__l5e/assets-v1/bfd78ae3-09ac-45f9-abf9-9cd0f1e529e3/Island-windows-x64.zip",
+  "version": "2.1.1",
+  "macArm": "/__l5e/assets-v1/6dd7453f-24be-45f5-83f2-320bc12dded3/Island-mac-arm64.zip",
+  "macIntel": "/__l5e/assets-v1/ecc4f6f3-861e-4c18-8894-325d4ef0c0d8/Island-mac-intel.zip",
+  "windows": "/__l5e/assets-v1/470d21d5-701f-44b6-8090-284a3390d18f/Island-windows-x64.zip",
   "notes": [
-    "Software update now checks the right place, so new versions show up.",
+    "Updates now install themselves: click Download and Island replaces itself and restarts.",
     "Clipboard history: your last 5 copied items, one click to copy again (colors show a swatch).",
     "Scratchpad and quick todos, saved on your computer.",
     "Converter: currencies (approximate), units, temperatures and time zones.",
     "AI fix: rewrite, summarize, translate or fix grammar for any text.",
-    "Ambient sounds: rain, coffee shop, white noise, ocean waves.",
-    "Stealth mode and battery time remaining on Mac."
+    "Ambient sounds: rain, coffee shop, white noise, ocean waves."
   ],
   "roadmap": [
-    {"version": "2.2", "title": "Calendar meeting countdown, system graphs, memory warnings", "eta": ""},
-    {"version": "2.3", "title": "Per-app volume, lyrics, colour picker, album-colour glow", "eta": ""},
-    {"version": "3.0", "title": "Signed builds with automatic in-place updates", "eta": ""}
+    {
+      "version": "2.2",
+      "title": "Calendar meeting countdown, system graphs, memory warnings",
+      "eta": ""
+    },
+    {
+      "version": "2.3",
+      "title": "Per-app volume, lyrics, colour picker, album-colour glow",
+      "eta": ""
+    },
+    {
+      "version": "3.0",
+      "title": "Signed builds with automatic in-place updates",
+      "eta": ""
+    }
   ]
 }
