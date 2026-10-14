@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('islandDesktop', {
  send: state => ipcRenderer.send('island:state', state),
  onState: subscribe('island:state'),
  onSystem: subscribe('island:system'),
+ appVolume: (name, v) => ipcRenderer.invoke('island:appVolume', name, v),
  clipboard: () => ipcRenderer.invoke('island:clipboard'),
  onClipboard: subscribe('island:clipboard'),
  copy: text => ipcRenderer.invoke('island:copy', text),
