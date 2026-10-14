@@ -26,7 +26,7 @@ async function installUpdate(zip){
   fs.writeFileSync(script,`while (Get-Process -Id ${pid} -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 500 }\nrobocopy "${fresh}" "${current}" /MIR /NFL /NDL /NJH /NJS | Out-Null\nStart-Process -FilePath "${path.join(current,'Island.exe')}"\n`);
   require('node:child_process').spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',script],{detached:true,stdio:'ignore'}).unref();
  } else throw new Error('unsupported');
- setTimeout(()=>{app.isQuitting=true; app.quit();},800);
+ setTimeout(()=>{app.quit();},800);
 }
 const devUrl=process.env.ISLAND_DEV_URL;
 const mac=process.platform==='darwin', win=process.platform==='win32';
