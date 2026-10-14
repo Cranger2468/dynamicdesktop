@@ -6,6 +6,28 @@ const {execFile} = require('node:child_process');
 let control, island, tray, quitting=false, settings={enabled:true,login:false,offset:8,display:'primary',events:{}}, shared={active:'Media',expanded:false,playing:false}, poll, statsPoll, hitTest, player=null, lastCpu=os.cpus(), winVolume=50, wasPlaying=false, lastSeek=0, wasCharging=null, dockVisible=false;
 let clips=[], lastClip='';
 const UPDATE_URL='https://dynamicdesktop.lovable.app/version.json';
+const runLong=(cmd,args)=>new Promise((res,rej)=>execFile(cmd,args,{timeout:180000},e=>e?rej(e):res()));
+function findIn(dir,name,depth=3){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name); if(e.name===name) return p; if(e.isDirectory()&&depth>0&&!e.name.endsWith('.app')){const f=findIn(p,name,depth-1); if(f) return f;}} return null;}
+// Unpack the downloaded zip, then a detached helper swaps the installed app after Island quits and reopens it.
+async function installUpdate(zip){
+ const work=fs.mkdtempSync(path.join(os.tmpdir(),'island-update-')); const pid=process.pid;
+ if(process.platform==='darwin'){
+  const current=path.resolve(process.execPath,'..','..','..'); if(!current.endsWith('.app')||current.includes('AppTranslocation')) throw new Error('not installable');
+  fs.accessSync(path.dirname(current),fs.constants.W_OK);
+  await runLong('/usr/bin/ditto',['-x','-k',zip,work]); const fresh=findIn(work,'Island.app'); if(!fresh) throw new Error('bad zip');
+  const script=path.join(work,'install.sh');
+  fs.writeFileSync(script,`#!/bin/sh\nwhile kill -0 ${pid} 2>/dev/null; do sleep 0.5; done\nrm -rf "${current}"\n/usr/bin/ditto "${fresh}" "${current}"\n/usr/bin/xattr -cr "${current}"\n/usr/bin/open "${current}"\n`,{mode:0o755});
+  require('node:child_process').spawn('/bin/sh',[script],{detached:true,stdio:'ignore'}).unref();
+ } else if(process.platform==='win32'){
+  const current=path.dirname(process.execPath); fs.accessSync(current,fs.constants.W_OK);
+  await runLong('powershell.exe',['-NoProfile','-Command',`Expand-Archive -LiteralPath '${zip}' -DestinationPath '${work}' -Force`]);
+  const exe=findIn(work,'Island.exe'); if(!exe) throw new Error('bad zip'); const fresh=path.dirname(exe);
+  const script=path.join(work,'install.ps1');
+  fs.writeFileSync(script,`while (Get-Process -Id ${pid} -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 500 }\nrobocopy "${fresh}" "${current}" /MIR /NFL /NDL /NJH /NJS | Out-Null\nStart-Process -FilePath "${path.join(current,'Island.exe')}"\n`);
+  require('node:child_process').spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',script],{detached:true,stdio:'ignore'}).unref();
+ } else throw new Error('unsupported');
+ setTimeout(()=>{app.quit();},800);
+}
 const devUrl=process.env.ISLAND_DEV_URL;
 const mac=process.platform==='darwin', win=process.platform==='win32';
 const run = (command,args) => new Promise((resolve,reject) => execFile(command,args,{timeout:8000,maxBuffer:65536,windowsHide:true},(error,stdout) => error ? reject(error) : resolve(String(stdout).trim())));
@@ -180,8 +202,8 @@ else {
      const out=fs.createWriteStream(file); const reader=res.body.getReader(); let received=0,lastSent=0;
      for(;;){const {done,value}=await reader.read(); if(done) break; received+=value.length; out.write(Buffer.from(value)); const pct=total?Math.round(100*received/total):0; if(pct!==lastSent){lastSent=pct; broadcast('island:update-progress',{pct});}}
      await new Promise(r=>out.end(r)); broadcast('island:update-progress',{pct:100,done:true});
-     shell.showItemInFolder(file);
-     return {ok:true,path:file};
+     try { await installUpdate(file); return {ok:true,installing:true}; }
+     catch { shell.showItemInFolder(file); return {ok:true,path:file}; }
     } catch(error){return {ok:false,error:'The download failed. Check your connection and try again.'};}
    });
   ipcMain.handle('island:clipboard',event=>{if(!trusted(event)) throw new Error('Untrusted caller'); return clips;});

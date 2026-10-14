@@ -6,7 +6,7 @@ const manifest = JSON.parse(readFileSync(resolve(__dirname, '../../public/versio
 
 describe('update manifest', () => {
   it('reports version 2.1.0', () => {
-    expect(manifest.version).toBe('2.1.0');
+    expect(manifest.version).toBe('2.1.1');
   });
 
   it('keeps a download link for every platform', () => {
