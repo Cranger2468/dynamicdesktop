@@ -47,6 +47,25 @@ public static float Get(){float l;Marshal.ThrowExceptionForHR(V().GetMasterVolum
 // Windows media session (any player that shows in the Windows media flyout: Spotify, browsers, Media Player).
 const WIN_MEDIA=`Add-Type -AssemblyName System.Runtime.WindowsRuntime;$at=([System.WindowsRuntimeSystemExtensions].GetMethods()|?{$_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation\`1'})[0];function Aw($o,$t){$k=$at.MakeGenericMethod($t).Invoke($null,@($o));$k.Wait(-1)|Out-Null;$k.Result};[Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager,Windows.Media.Control,ContentType=WindowsRuntime]|Out-Null;$mgr=Aw ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]);$s=$mgr.GetCurrentSession();`;
 function trusted(event) { return [control?.webContents.id,island?.webContents.id].includes(event.sender.id); }
+
+// v2.2: meeting countdown, download bubble, per-app (player) volume
+const DL_DIR=()=>app.getPath('downloads'); const dlSeen=new Map();
+async function readExtras(){
+ const mac=process.platform==='darwin', win=process.platform==='win32';
+ try{let m='';
+  if(mac) m=await run('/usr/bin/osascript',['-e','set n to current date','-e','set out to ""','-e','tell application "Calendar" to repeat with c in calendars','-e','set ev to (every event of c whose start date > n and start date < (n + 3600))','-e','repeat with e in ev','-e','set out to out & (summary of e) & "|" & (((start date of e) - n) div 60) & linefeed','-e','end repeat','-e','end repeat','-e','return out']);
+  else if(win) m=await ps('$o=New-Object -ComObject Outlook.Application -ErrorAction Stop;$i=$o.GetNamespace("MAPI").GetDefaultFolder(9).Items;$i.IncludeRecurrences=$true;$i.Sort("[Start]");$n=Get-Date;foreach($e in $i.Restrict("[Start] >= \'"+$n.ToString("g")+"\' AND [Start] <= \'"+$n.AddHours(1).ToString("g")+"\'")){"$($e.Subject)|$([int](($e.Start-$n).TotalMinutes))"}');
+  const next=String(m).split(/\r?\n/).map(l=>l.split('|')).filter(a=>a.length===2&&a[1]!=='').map(([title,mins])=>({title:title.slice(0,60),mins:Number(mins)})).sort((a,b)=>a.mins-b.mins)[0]||null;
+  broadcast('island:system',{meeting:next});
+ }catch{broadcast('island:system',{meeting:null});}
+ try{const parts=fs.readdirSync(DL_DIR()).filter(f=>/\.(crdownload|download|part|partial)$/i.test(f)).slice(0,3);
+  const list=parts.map(f=>{let size=0;try{const p=path.join(DL_DIR(),f);size=fs.statSync(p).isDirectory()?0:fs.statSync(p).size;}catch{} const prev=dlSeen.get(f)||size; dlSeen.set(f,size); return {name:f.replace(/\.(crdownload|download|part|partial)$/i,'').slice(0,50),mb:Math.round(size/1048576),speed:Math.max(0,Math.round((size-prev)/1048576/4*10)/10)};});
+  for(const k of dlSeen.keys()) if(!parts.includes(k)) dlSeen.delete(k);
+  broadcast('island:system',{downloads:list});
+ }catch{}
+ if(mac){const apps=[];for(const a of ['Spotify','Music']){try{const r=await run('/usr/bin/osascript',['-e',`if application "${a}" is running then tell application "${a}" to return sound volume`]);if(r!=='') apps.push({name:a,volume:Number(r)});}catch{}} broadcast('island:system',{apps});}
+}
+async function setAppVolume(name,v){const n=Math.max(0,Math.min(100,Math.round(Number(v)||0))); if(process.platform==='darwin'&&['Spotify','Music'].includes(name)) await run('/usr/bin/osascript',['-e',`tell application "${name}" to set sound volume to ${n}`]);}
 function broadcast(channel,data,except) {for(const w of [control,island]) if(w && !w.isDestroyed() && w.webContents.id!==except) w.webContents.send(channel,data);}
 function selectedDisplay() {return screen.getAllDisplays().find(d=>String(d.id)===settings.display) || screen.getPrimaryDisplay();}
 function position() {if(!island) return; const display=selectedDisplay(); island.setBounds({x:Math.round(display.bounds.x+(display.bounds.width-410)/2),y:display.bounds.y,width:410,height:260});}
@@ -211,7 +230,8 @@ else {
   setInterval(()=>{const t=clipboard.readText(); if(!t||t===lastClip||t.length>20000) return; lastClip=t; clips=[t,...clips.filter(c=>c!==t)].slice(0,5); broadcast('island:clipboard',clips);},1500);
   screen.on('display-added',position);screen.on('display-removed',position);screen.on('display-metrics-changed',position);
   powerMonitor.on('on-ac',()=>void readSystem());powerMonitor.on('on-battery',()=>void readSystem());
-  void readSystem();const tick=()=>{poll=setTimeout(async()=>{await readSystem().catch(()=>{});tick();},player?.playing?1500:player?3000:8000);};tick();statsPoll=setInterval(readStats,5000);
+  void readSystem();const tick=()=>{poll=setTimeout(async()=>{await readSystem().catch(()=>{});tick();},player?.playing?1500:player?3000:8000);};tick();statsPoll=setInterval(readStats,5000);void readExtras();setInterval(()=>void readExtras().catch(()=>{}),4000);
+  ipcMain.handle('island:appVolume',async(event,name,v)=>{if(!trusted(event)) return {ok:false}; try{await setAppVolume(String(name),v);return {ok:true};}catch{return {ok:false};}});
  });
 }
 app.on('window-all-closed',()=>{});
